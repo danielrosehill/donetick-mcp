@@ -87,6 +87,7 @@ class DonetickClient:
         base_url: str | None = None,
         username: str | None = None,
         password: str | None = None,
+        api_token: str | None = None,
         rate_limit_per_second: float | None = None,
         rate_limit_burst: int | None = None,
     ):
@@ -97,12 +98,14 @@ class DonetickClient:
             base_url: Donetick instance URL (defaults to config)
             username: Donetick username (defaults to config)
             password: Donetick password (defaults to config)
+            api_token: Donetick API token (defaults to config); replaces login
             rate_limit_per_second: Rate limit in requests per second (defaults to config)
             rate_limit_burst: Maximum burst size (defaults to config)
         """
         self.base_url = (base_url or config.donetick_base_url).rstrip("/")
         self.username = username or config.donetick_username
         self.password = password or config.donetick_password
+        self.api_token = api_token if api_token is not None else config.donetick_api_token
         self._jwt_token: str | None = None
         self.rate_limiter = TokenBucket(
             rate=rate_limit_per_second or config.rate_limit_per_second,
@@ -129,6 +132,8 @@ class DonetickClient:
             verify=True,  # Enforce certificate verification
             follow_redirects=True,  # Follow HTTP redirects (e.g. 301)
         )
+        if self.api_token:
+            self.client.headers["secretkey"] = self.api_token
 
     async def __aenter__(self):
         """Async context manager entry."""
@@ -213,7 +218,7 @@ class DonetickClient:
             httpx.HTTPError: On HTTP errors after all retries exhausted
         """
         # Ensure we have a valid JWT token (lazy initialization)
-        if self._jwt_token is None:
+        if self._jwt_token is None and not self.api_token:
             await self.login()
 
         url = f"{self.base_url}{path}"
@@ -239,7 +244,7 @@ class DonetickClient:
 
                 # Handle authentication errors (401 Unauthorized)
                 if response.status_code == 401:
-                    if not auth_retry_attempted:
+                    if not auth_retry_attempted and not self.api_token:
                         logger.warning("Authentication failed (401), refreshing JWT token")
                         auth_retry_attempted = True
                         await self.login()

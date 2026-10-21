@@ -994,7 +994,7 @@ def run_http():
     session_manager = StreamableHTTPSessionManager(
         app=app,
         json_response=False,
-        stateless=False,
+        stateless=config.stateless_http,
         session_idle_timeout=1800,
     )
 

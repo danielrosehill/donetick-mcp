@@ -100,11 +100,19 @@ Add to your MCP config (`.mcp.json`, `claude_desktop_config.json`, etc.):
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DONETICK_BASE_URL` | Yes | — | Donetick instance URL |
-| `DONETICK_USERNAME` | Yes | — | Donetick username |
-| `DONETICK_PASSWORD` | Yes | — | Donetick password |
+| `DONETICK_USERNAME` | Yes¹ | — | Donetick username |
+| `DONETICK_PASSWORD` | Yes¹ | — | Donetick password |
+| `DONETICK_API_TOKEN` | No | — | Donetick API token (`dt_…`, *Settings → API tokens*). Sent as the `secretkey` header; replaces username/password login |
+| `MCP_TRANSPORT` | No | `stdio` | `stdio` or `http` (streamable HTTP at `/mcp/`) |
+| `MCP_STATELESS` | No | `false` | `true` runs streamable HTTP without sessions, for aggregators/proxies that open a new session per call |
 | `LOG_LEVEL` | No | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 | `RATE_LIMIT_PER_SECOND` | No | `10.0` | API rate limit |
 | `RATE_LIMIT_BURST` | No | `10` | Burst capacity |
+
+¹ Not needed when `DONETICK_API_TOKEN` is set. Donetick (v0.1.83, checked 2026-10-21) accepts the
+`secretkey` header on every `/api/v1` route, so a token gives the same access as the account that
+created it, with no stored password. Tokens are stored hashed (SHA-256) server side; legacy
+pre-`dt_` tokens are compared raw.
 
 ## Create Chore Examples
 

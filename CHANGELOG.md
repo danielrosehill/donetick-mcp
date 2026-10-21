@@ -5,6 +5,16 @@ All notable changes to the Donetick MCP Server will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-21
+
+### Added
+- `DONETICK_API_TOKEN`: authenticate with a Donetick API token (`secretkey` header) instead of
+  username/password. No login call, no JWT refresh. Username/password become optional when set.
+- `MCP_STATELESS=true`: stateless streamable HTTP, for gateways that open a session per call.
+
+### Fixed
+- Pin `mcp<2`. MCP SDK 2.x removed `Server.list_tools`, so a fresh install crashed on import.
+
 ## [0.3.13] - 2025-11-06
 
 ### Fixed

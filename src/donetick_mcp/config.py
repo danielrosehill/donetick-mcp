@@ -27,7 +27,13 @@ class Config:
         self.host = os.getenv("MCP_HOST", "0.0.0.0")
         self.port = int(os.getenv("MCP_PORT", "8000"))
 
-        # Check for deprecated API token
+        # Stateless streamable HTTP: no session state between requests. Needed
+        # behind aggregators and proxies that open a fresh session per call.
+        self.stateless_http = os.getenv("MCP_STATELESS", "false").lower() in ("1", "true", "yes")
+
+        # API token (Settings -> API tokens in Donetick, "dt_..."). Sent in the
+        # `secretkey` header, which Donetick's multi-auth middleware accepts on
+        # every /api/v1 route. Takes precedence over username/password.
         self.donetick_api_token = os.getenv("DONETICK_API_TOKEN")
 
         # Validate required configuration (skip if in test mode)
@@ -54,25 +60,17 @@ class Config:
                     f"Got: {self.donetick_base_url[:50]}"
                 )
 
-        # Check for deprecated API token
-        if self.donetick_api_token:
-            warnings.append(
-                "DONETICK_API_TOKEN is deprecated in v2.0.0. "
-                "Please migrate to JWT authentication using DONETICK_USERNAME and DONETICK_PASSWORD. "
-                "See migration guide: https://github.com/yourusername/donetick-mcp-server#migration"
+        # Username and password are only needed without an API token
+        if not self.donetick_api_token and not self.donetick_username:
+            errors.append(
+                "DONETICK_USERNAME environment variable is required "
+                "(or set DONETICK_API_TOKEN instead)."
             )
 
-        # Check username and password for JWT auth
-        if not self.donetick_username:
+        if not self.donetick_api_token and not self.donetick_password:
             errors.append(
-                "DONETICK_USERNAME environment variable is required. "
-                "Please set it to your Donetick account username."
-            )
-
-        if not self.donetick_password:
-            errors.append(
-                "DONETICK_PASSWORD environment variable is required. "
-                "Please set it to your Donetick account password."
+                "DONETICK_PASSWORD environment variable is required "
+                "(or set DONETICK_API_TOKEN instead)."
             )
 
         # Log warnings
