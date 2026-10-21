@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `MCP_STATELESS=true`: stateless streamable HTTP, for gateways that open a session per call.
 
 ### Fixed
+- Dockerfile: copy `src/` and `README.md` before `pip install` (the build failed).
 - Pin `mcp<2`. MCP SDK 2.x removed `Server.list_tools`, so a fresh install crashed on import.
 
 ## [0.3.13] - 2025-11-06
