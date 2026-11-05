@@ -571,6 +571,7 @@ class DonetickClient:
             "POST",
             f"/api/v1/chores/{chore_id}/do",
             params=params,
+            json={},  # Donetick reads a JSON body here and answers 400 to an empty one
         )
 
         # Handle both direct object and wrapped response

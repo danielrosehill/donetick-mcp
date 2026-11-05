@@ -486,3 +486,11 @@ class TestChoreCreateFrequencyTypeValidation:
             )
         error = exc_info.value
         assert "frequencytype" in str(error).lower() or "frequency type" in str(error).lower()
+
+
+def test_chore_detail_accepts_the_details_route_without_frequency_or_timestamps():
+    """/chores/{id}/details no longer returns frequency, createdAt or updatedAt."""
+    from donetick_mcp.models import ChoreDetail
+
+    detail = ChoreDetail(id=1, name="x", frequencyType="once", circleId=1, createdBy=1)
+    assert detail.frequency == 1 and detail.createdAt is None and detail.updatedAt is None

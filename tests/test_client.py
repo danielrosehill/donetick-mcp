@@ -227,6 +227,9 @@ class TestDonetickClient:
 
         assert chore.id == 1
         assert chore.name == "Test Chore"
+        # Donetick answers 400 to an empty body on this route
+        do = [r for r in httpx_mock.get_requests() if r.url.path.endswith("/do")][0]
+        assert do.content == b"{}"
 
     @pytest.mark.asyncio
     async def test_update_chore_basic(self, client, sample_chore_data, httpx_mock: HTTPXMock, mock_login):
